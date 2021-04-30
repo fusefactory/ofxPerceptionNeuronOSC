@@ -17,19 +17,24 @@
 class PerceptionNeuronRecorder : public ofThread{
 public:
     PerceptionNeuronRecorder();
-    void startRecord(std::string filename);
-    void addData(std::map<PerceptionNeuronJointType, PerceptionNeuronJoint> &avatar, int identifier = 0);
+    void startRecord(std::string folder, int identifier = 0);
+    void addData(std::map<PerceptionNeuronJointType, PerceptionNeuronJoint> &avatar);
     void endRecord();
+    inline std::string getFolder(){return folder;}
     
-private:
-    bool needsClear;
+protected:
+    int identifier;
+    bool needsClear;            //if yes next data clears values
     bool ends;
-    std::string filename;
+    int numberFiles;
+    std::string folder;
     Json::Value values;
+    vector<PerceptionNeuronJointType> jointTypesToSave;
     
     void threadedFunction();
     void saveToFile(std::string filename,  Json::Value &values);
     void clearData();
+    virtual void addJSONValue(PerceptionNeuronJointType &type, PerceptionNeuronJoint &joint, Json::Value &joints, const int index);
 };
 
 #endif /* PerceptionNeuronRecorder_hpp */
