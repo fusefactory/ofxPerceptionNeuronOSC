@@ -37,7 +37,7 @@ void PerceptionNeuronRecorder::addData(std::map<PerceptionNeuronJointType, Perce
 
 void PerceptionNeuronRecorder::addJSONValue(PerceptionNeuronJointType &type, PerceptionNeuronJoint &joint, Json::Value &joints, const int index){
     ofVec3f position = joint.getPosition();
-    ofVec3f rotation = joint.getRotation();
+    ofVec4f rotation = joint.getRotation();
 
     joints[index]["type"] = type;
     
@@ -48,6 +48,7 @@ void PerceptionNeuronRecorder::addJSONValue(PerceptionNeuronJointType &type, Per
     joints[index]["rotation"]["x"] = rotation.x;
     joints[index]["rotation"]["y"] = rotation.y;
     joints[index]["rotation"]["z"] = rotation.z;
+    joints[index]["rotation"]["w"] = rotation.w;
 }
 
 void PerceptionNeuronRecorder::threadedFunction() {
@@ -60,7 +61,10 @@ void PerceptionNeuronRecorder::threadedFunction() {
         
         cout << "Saved: " << values.size() << endl;
         
-        std::string path = ofToDataPath(folder + "/pn_" + ofToString(numberFiles) + ".json");
+        std::ostringstream oss;
+        oss << setw(6) << setfill('0') << numberFiles;
+        string s = oss.str();
+        std::string path = ofToDataPath(folder + "/pn_" + s + ".json");
         saveToFile(path, values);
         numberFiles ++;
         
@@ -68,8 +72,7 @@ void PerceptionNeuronRecorder::threadedFunction() {
         unlock();
         
         if(e) stopThread();
-        
-        sleep(10000);
+        else sleep(10000);
     }
 }
 

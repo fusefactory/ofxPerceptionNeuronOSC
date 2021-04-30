@@ -41,9 +41,10 @@ void PerceptionNeuronMonitor::update() {
     
     for (int i = PerceptionNeuronJointType::Root; i <= PerceptionNeuronJointType::LeftInHandPinky3; i++) {
         PerceptionNeuronJointType type = static_cast<PerceptionNeuronJointType>(i);
-        ofVec3f position = receiver->avatar.at(type).getPosition() - root;
-        positions.push_back(ofVec4f(position.x, position.y, position.z, 1));
-        
+        if(receiver->avatar.count(type) > 0){
+            ofVec3f position = receiver->avatar.at(type).getPosition() - root;
+            positions.push_back(ofVec4f(position.x, position.y, position.z, 1));
+        }
         colors.push_back(ofVec4f(1, 0, 0, 1));
     }
     
