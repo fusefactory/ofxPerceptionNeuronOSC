@@ -11,7 +11,7 @@ void PerceptionNeuronSalRecording::addJSONValue(PerceptionNeuronJointType &type,
     
     if(type == Root){
         ofVec3f position = joint.getPosition();
-        ofVec3f rotation = joint.getRotation();
+        ofVec4f rotation = joint.getRotation();
 
         joints[index]["type"] = type;
         
@@ -22,6 +22,7 @@ void PerceptionNeuronSalRecording::addJSONValue(PerceptionNeuronJointType &type,
         joints[index]["rotation"]["x"] = rotation.x;
         joints[index]["rotation"]["y"] = rotation.y;
         joints[index]["rotation"]["z"] = rotation.z;
+        joints[index]["rotation"]["w"] = rotation.w;
     }
     else if(type == RightUpLeg ||
             type == RightLeg ||
@@ -48,6 +49,10 @@ void PerceptionNeuronSalRecording::addJSONValue(PerceptionNeuronJointType &type,
         ofVec3f rotation = joint.getRotation();
 
         joints[index]["type"] = type;
+        
+        joints[index]["position"]["x"] = position.x;
+        joints[index]["position"]["y"] = position.y;
+        joints[index]["position"]["z"] = position.z;
         
         joints[index]["rotation"]["x"] = rotation.x;
         joints[index]["rotation"]["y"] = rotation.y;

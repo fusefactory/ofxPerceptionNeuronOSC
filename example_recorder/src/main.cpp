@@ -14,7 +14,7 @@ int main( ){
     #endif
     settings.setSize(1000, 700);
     shared_ptr<ofAppBaseWindow> mainWindow = ofCreateWindow(settings);
-    mainWindow->setWindowTitle("Perception Neuron OSC Reader");
+    mainWindow->setWindowTitle("Perception Neuron OSC Recorder");
 
     shared_ptr<ofApp> mainApp(new ofApp);
     ofRunApp(mainWindow, mainApp);          //execute setup
