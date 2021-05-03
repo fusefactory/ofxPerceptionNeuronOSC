@@ -15,24 +15,8 @@ PerceptionNeuronRecorder::PerceptionNeuronRecorder(){
 }
 
 void PerceptionNeuronRecorder::addData(std::map<PerceptionNeuronJointType, PerceptionNeuronJoint> &avatar){
-    if(needsClear){
-        clearData();
-    }
-    
-    uint64_t time = ofGetSystemTimeMillis();
-    
-    Json::Value val;
-    val["timestamp"] = time;
-    Json::Value joints;
-
-    for (int i = PerceptionNeuronJointType::Root; i <= PerceptionNeuronJointType::LeftInHandPinky3; i++) {
-        PerceptionNeuronJointType type = static_cast<PerceptionNeuronJointType>(i);
-        PerceptionNeuronJoint &joint = avatar.at(type);
-        addJSONValue(type, joint, joints, i);
-    }
-    
-    val["joints"] = joints;
-    values.append(val);
+    avatars.push_back(avatar);
+    timestamps.push_back(ofGetSystemTimeMillis());
 }
 
 void PerceptionNeuronRecorder::addJSONValue(PerceptionNeuronJointType &type, PerceptionNeuronJoint &joint, Json::Value &joints, const int index){
@@ -56,23 +40,59 @@ void PerceptionNeuronRecorder::threadedFunction() {
     const std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
     
     while (isThreadRunning()) {
-        lock();
         bool e = ends;
         
-        cout << "Saved: " << values.size() << endl;
+        const int avatarSize = avatars.size() - 2; //ignore last data
+        const int startIndex = savedIndex;
+        const int size = avatarSize - startIndex;
         
-        std::ostringstream oss;
-        oss << setw(6) << setfill('0') << numberFiles;
-        string s = oss.str();
-        std::string path = ofToDataPath(folder + "/pn_" + s + ".json");
-        saveToFile(path, values);
-        numberFiles ++;
-        
-        needsClear = true;
-        unlock();
-        
-        if(e) stopThread();
-        else sleep(10000);
+        if(size > numberFramePerFile || e){
+            //updated
+            savedIndex = avatarSize;
+            
+            Json::Value root;
+            for(int i = startIndex; i < avatarSize; i++){
+                uint64_t time = timestamps[i];
+                std::map<PerceptionNeuronJointType, PerceptionNeuronJoint> &avatar = avatars.at(i);
+                
+                Json::Value val;
+                val["timestamp"] = time;
+                Json::Value joints;
+                
+                for (int j = PerceptionNeuronJointType::Root; j <= PerceptionNeuronJointType::LeftInHandPinky3; j++) {
+                    PerceptionNeuronJointType type = static_cast<PerceptionNeuronJointType>(j);
+                    if ( avatar.find(type) == avatar.end() ) {
+                        // not found
+                        ofLogWarning() << "ofxPerceptionNeuronOSC::PerceptionNeuronRecorder not found type " << type << " at index: " << i;
+                    } else {
+                        // found
+                        PerceptionNeuronJoint &joint = avatar.at(type);
+                        addJSONValue(type, joint, joints, joints.size());
+                    }
+                }
+                
+                val["joints"] = joints;
+                root.append(val);
+            }
+            
+            std::ostringstream oss;
+            oss << setw(6) << setfill('0') << (numberFiles +1);
+            string s = oss.str();
+            std::string path = ofToDataPath(folder + "/pn_" + s + ".json");
+            saveToFile(path, root);
+            numberFiles ++;
+        }
+            
+        if(e) {
+            //clear current vector temp
+            avatars.clear();
+            timestamps.clear();
+            
+            ofLogVerbose() << "ofxPerceptionNeuronOSC::PerceptionNeuronRecorder cleared data stop thread ";
+
+            stopThread();
+        }
+        else sleep(10);
     }
 }
 
@@ -81,9 +101,11 @@ void PerceptionNeuronRecorder::saveToFile(std::string filename, Json::Value &roo
         Json::StreamWriterBuilder builder;
         builder["indentation"] = "";
         std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
-        std::ofstream outputFileStream(filename, std::ofstream::app);
+        std::ofstream outputFileStream(filename, std::ofstream::out);
         writer -> write(root, &outputFileStream);
         outputFileStream.close();
+        
+        ofLogVerbose() << "ofxPerceptionNeuronOSC::PerceptionNeuronRecorder saved " << root.size() << " frames.";
     }
 }
 
@@ -97,16 +119,10 @@ void PerceptionNeuronRecorder::startRecord(std::string folder, int identifier){
     }
 
     numberFiles = 0;
-    clearData();
+    savedIndex = 0;
     startThread();
 }
 
 void PerceptionNeuronRecorder::endRecord(){
     ends = true;
-}
-
-void PerceptionNeuronRecorder::clearData(){
-    values.clear();
-    needsClear = false;
-    ends = false;
 }

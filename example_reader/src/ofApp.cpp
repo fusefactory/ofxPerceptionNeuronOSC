@@ -5,18 +5,24 @@ void ofApp::setup(){
     ofBackground(0);
     ofSetFrameRate(60);
     ofSetLogLevel(OF_LOG_VERBOSE);
-
+    
     perceptionNeuronReceiver = new PerceptionNeuronReceiver(7432);
-    perceptionNeuronReceiver->addListener(this);
-    perceptionNeuronReceiver->start();
+//    perceptionNeuronReceiver->addListener(this);
+//    perceptionNeuronReceiver->start();
     perceptionNeuronMonitor = new PerceptionNeuronMonitor(perceptionNeuronReceiver, ofGetWidth() / 2.0, ofGetHeight() / 2.0);
     perceptionNeuronMonitor->init();
-    perceptionTime = ofGetSystemTimeMillis();    
+    perceptionTime = ofGetSystemTimeMillis();
+    
+    cout << "Loading record from files " << endl;
+    reader.loadAsync(ofToDataPath("records/c"));
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
-    if(saving)  recorder.addData(perceptionNeuronReceiver->avatar);
+    if(reader.isRunning()){
+        reader.update();
+        perceptionNeuronReceiver->avatar = reader.getCurrentAvatar();
+    }
 }
 
 //--------------------------------------------------------------
@@ -40,32 +46,23 @@ void ofApp::draw(){
     ofDrawBitmapStringHighlight("framerate - " + ofToString(ofGetFrameRate(), 3), 15, 60, ofColor(0, 127), ofColor(255));
 
     string text = "";
-    if(! saving){
+    if(!reader.isReady()){
+        text = "Loading";
+    }
+    else if(reader.isReady() && ! reader.isRunning()){
         text = "Ready";
     }
-    else{
-        text = "Recording " + ofToString(recorder.getFrameCurrentRecord());
+    else if(reader.isRunning()){
+        text = "Running " + ofToString(reader.getFrameNum());
     }
        
     ofDrawBitmapStringHighlight("Status: " + text, 15, 80, ofColor(0, 127), ofColor(255));
 }
 
-void ofApp::newJoint(PerceptionNeuronJoint & joint) {
-    perceptionTime = ofGetSystemTimeMillis();
-}
-
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
-    if(key == 'a'){
-        cout << "Start of recording " << endl;
-        saving = true;
-        recorder.startRecord(ofToString(ofGetSystemTimeMillis()));
-    }
     if(key=='s'){
-        cout << "End of recording. Saved to " << recorder.getFolder() << endl;
-
-        recorder.endRecord();
-        saving = false;
+        if(reader.isReady()) reader.start();
     }
 }
 

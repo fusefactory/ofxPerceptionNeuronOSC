@@ -21,20 +21,27 @@ public:
     void addData(std::map<PerceptionNeuronJointType, PerceptionNeuronJoint> &avatar);
     void endRecord();
     inline std::string getFolder(){return folder;}
+    inline void setNumberFramePerFile(const int n){numberFramePerFile = n;}
+    bool isRecording(){return isThreadRunning();}
+    int getFrameCurrentRecord(){return avatars.size(); }
     
 protected:
-    int identifier;
-    bool needsClear;            //if yes next data clears values
-    bool ends;
-    int numberFiles;
+    int identifier;                 //avatar id
+    bool needsClear;                //if yes next data clears values
+    bool ends;                      //if yes next stop the thread
+    int numberFiles;                //number file for current recording
+    int numberFramePerFile = 300;   //number of frame for single json file
     std::string folder;
-    Json::Value values;
     vector<PerceptionNeuronJointType> jointTypesToSave;
     
     void threadedFunction();
     void saveToFile(std::string filename,  Json::Value &values);
-    void clearData();
     virtual void addJSONValue(PerceptionNeuronJointType &type, PerceptionNeuronJoint &joint, Json::Value &joints, const int index);
+    
+    //buffer where store temp data
+    vector<std::map<PerceptionNeuronJointType, PerceptionNeuronJoint>> avatars;
+    vector<uint64_t> timestamps;
+    int savedIndex;
 };
 
 #endif /* PerceptionNeuronRecorder_hpp */
