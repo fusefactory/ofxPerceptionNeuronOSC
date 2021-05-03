@@ -1,6 +1,6 @@
 # ofxPerceptionNeuronOSC
 
-Addons to receive [Perception Neuron](https://neuronmocap.com/) data via OSC. The converter from Axis Neuron protocol (BVH) to OSC can be found in release page (todo).
+Addons to receive [Perception Neuron](https://neuronmocap.com/) data via OSC. The converter **NeuronOSC** from Axis Neuron protocol (BVH) to OSC can be found [here](https://drive.google.com/drive/folders/1UFvMgo8UXNV2YpCbPOvqILvrhXMgogdQ?usp=sharing).
 
 ---
 
