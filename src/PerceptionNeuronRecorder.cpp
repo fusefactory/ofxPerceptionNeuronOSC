@@ -14,8 +14,9 @@ PerceptionNeuronRecorder::PerceptionNeuronRecorder(){
 
 }
 
-void PerceptionNeuronRecorder::addData(std::map<PerceptionNeuronJointType, PerceptionNeuronJoint> &avatar){
+void PerceptionNeuronRecorder::addData(std::map<PerceptionNeuronJointType, PerceptionNeuronJoint> &avatar, ofVec3f offset){
     avatars.push_back(avatar);
+    offsets.push_back(offset);
     timestamps.push_back(ofGetSystemTimeMillis());
 }
 
@@ -53,6 +54,7 @@ void PerceptionNeuronRecorder::threadedFunction() {
             Json::Value root;
             for(int i = startIndex; i < avatarSize; i++){
                 uint64_t time = timestamps[i];
+                ofVec3f& offset = offsets[i];
                 std::map<PerceptionNeuronJointType, PerceptionNeuronJoint> &avatar = avatars.at(i);
                 
                 Json::Value val;
@@ -67,6 +69,8 @@ void PerceptionNeuronRecorder::threadedFunction() {
                     } else {
                         // found
                         PerceptionNeuronJoint &joint = avatar.at(type);
+                        ofVec3f p = joint.getPosition() + offset;
+                        joint.setPosition(p.x, p.y, p.z);
                         addJSONValue(type, joint, joints, joints.size());
                     }
                 }
