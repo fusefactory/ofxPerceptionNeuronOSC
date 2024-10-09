@@ -21,11 +21,15 @@ PerceptionNeuronReader::PerceptionNeuronReader(){
     
 }
 
-std::map<PerceptionNeuronJointType, PerceptionNeuronJoint> PerceptionNeuronReader::getCurrentAvatar(){
-    if(ready){
+std::map<PerceptionNeuronJointType, PerceptionNeuronJoint> PerceptionNeuronReader::getCurrentAvatar() {
+    if (ready) {
         return currentPerceptionNeuronReaderData->avatar;
+    } else {
+        // Return a default value or throw an exception
+        return std::map<PerceptionNeuronJointType, PerceptionNeuronJoint>(); // Return an empty map
     }
 }
+
 
 bool PerceptionNeuronReader::isReady(){return ready;}
 bool PerceptionNeuronReader::isRunning(){return running;}
@@ -58,6 +62,8 @@ bool PerceptionNeuronReader::load(std::string folder){
     }
     
     ready = true;
+    
+    return ready;
 }
 
 void PerceptionNeuronReader::loadAsync(std::string folder){
@@ -112,6 +118,8 @@ bool PerceptionNeuronReader::loadFile(std::string filename){
     string name = "";
     if(splitString.size() > 0) name = splitString.at(splitString.size()-1);
     ofLogVerbose() << "ofxPerceptionNeuronOSC::PerceptionNeuronDataReader::loadFile LOADED filename:" << name;
+    
+    return false;
 }
 
 void PerceptionNeuronReader::update(){
