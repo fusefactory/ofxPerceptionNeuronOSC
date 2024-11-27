@@ -14,10 +14,10 @@ PerceptionNeuronRecorder::PerceptionNeuronRecorder(){
 
 }
 
-void PerceptionNeuronRecorder::addData(std::map<PerceptionNeuronJointType, PerceptionNeuronJoint> &avatar, ofVec3f offset){
+void PerceptionNeuronRecorder::addData(std::map<PerceptionNeuronJointType, PerceptionNeuronJoint> &avatar, ofVec3f offset, float time){
     avatars.push_back(avatar);
     offsets.push_back(offset);
-    timestamps.push_back(ofGetSystemTimeMillis());
+    timestamps.push_back(time);
 }
 
 void PerceptionNeuronRecorder::addJSONValue(PerceptionNeuronJointType &type, PerceptionNeuronJoint &joint, Json::Value &joints, const int index){

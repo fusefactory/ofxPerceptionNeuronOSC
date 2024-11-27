@@ -18,7 +18,7 @@ class PerceptionNeuronRecorder : public ofThread{
 public:
     PerceptionNeuronRecorder();
     void startRecord(std::string folder, int identifier = 0);
-    void addData(std::map<PerceptionNeuronJointType, PerceptionNeuronJoint> &avatar, ofVec3f offset = ofVec3f(0));
+    void addData(std::map<PerceptionNeuronJointType, PerceptionNeuronJoint> &avatar, ofVec3f offset = ofVec3f(0), float time = 0.f);
     void endRecord();
     inline std::string getFolder(){return folder;}
     inline void setNumberFramePerFile(const int n){numberFramePerFile = n;}
@@ -40,7 +40,7 @@ protected:
     
     //buffer where store temp data
     vector<std::map<PerceptionNeuronJointType, PerceptionNeuronJoint>> avatars;
-    vector<uint64_t> timestamps;
+    vector<float> timestamps; // relative to the timeline
     vector<ofVec3f> offsets;
 
     int savedIndex;
