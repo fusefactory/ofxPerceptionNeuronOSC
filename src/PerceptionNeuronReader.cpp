@@ -37,7 +37,7 @@ int PerceptionNeuronReader::getFrameNum(){return currentIndex;}
 
 void PerceptionNeuronReader::start(){
     running = true;
-    goToNextData();
+//    goToNextData();
     currentIndex = 0;
     update(0);
 }
@@ -132,12 +132,13 @@ void PerceptionNeuronReader::update(int time){
     currentTime = time;
     if(ready && running){
         if (currentTime > start_t && currentTime < end_t){
+            goToNextData();
             uint64_t ellapsedTimeMillis = ofGetElapsedTimeMillis();
             if(ofGetElapsedTimeMillis() - currentPerceptionNeuronReaderData->timeMillis > diffNextMillis){
                 goToNextData();
             }
         }
-        else if (currentPerceptionNeuronReaderData == NULL){
+        else{
             currentPerceptionNeuronReaderData = &percepionNeuronReaderData.at(0);
         }
     }
@@ -156,7 +157,7 @@ void PerceptionNeuronReader::goToNextData(){
         int testTime = pnTime;
         int prevTestTime = 0;
         int testIndex = bias;
-        if (pnTime > distance){
+        if (pnTime > currentTime){
             testTime = start_t;
         }
         
@@ -172,29 +173,34 @@ void PerceptionNeuronReader::goToNextData(){
                 break;
             } else{
                 testIndex += bias;
+//                testIndex ++;
             }
         }
+    }
+    
+    while (currentTime > pnTime && currentIndex < percepionNeuronReaderData.size()-1){
+        currentIndex++;
         
-        
+        currentPerceptionNeuronReaderData = &percepionNeuronReaderData.at(currentIndex);
+        pnTime = currentPerceptionNeuronReaderData->timeMillis;
     }
     
     
-    
-    currentIndex++;
-    
-    //loop
-    if(currentIndex == percepionNeuronReaderData.size()) {
-        ofLogWarning() << "ofxPerceptionNeuronOSC::PerceptionNeuronDataReader the record is ended > restart." << endl;
-        currentIndex = 0;
-    }
-    
-    currentPerceptionNeuronReaderData = &percepionNeuronReaderData.at(currentIndex);
-
-    if(currentIndex < percepionNeuronReaderData.size()-1){
-        PerceptionNeuronReaderData &nextData = percepionNeuronReaderData.at(currentIndex+1);
-        uint64_t nextDataTime = nextData.timeMillis;
-        
-        diffNextMillis = nextDataTime - currentPerceptionNeuronReaderData->timeMillis;
-    }
+//    currentIndex++;
+//    
+//    //loop
+//    if(currentIndex == percepionNeuronReaderData.size()) {
+//        ofLogWarning() << "ofxPerceptionNeuronOSC::PerceptionNeuronDataReader the record is ended > restart." << endl;
+//        currentIndex = 0;
+//    }
+//    
+//    currentPerceptionNeuronReaderData = &percepionNeuronReaderData.at(currentIndex);
+//
+//    if(currentIndex < percepionNeuronReaderData.size()-1){
+//        PerceptionNeuronReaderData &nextData = percepionNeuronReaderData.at(currentIndex+1);
+//        uint64_t nextDataTime = nextData.timeMillis;
+//        
+//        diffNextMillis = nextDataTime - currentPerceptionNeuronReaderData->timeMillis;
+//    }
 }
 
