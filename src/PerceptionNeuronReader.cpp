@@ -38,7 +38,8 @@ int PerceptionNeuronReader::getFrameNum(){return currentIndex;}
 void PerceptionNeuronReader::start(){
     running = true;
     goToNextData();
-    update();
+    currentIndex = 0;
+    update(0);
 }
 
 bool PerceptionNeuronReader::load(std::string folder){
@@ -60,6 +61,11 @@ bool PerceptionNeuronReader::load(std::string folder){
 //            cout << "percepionNeuronReaderData.size(): " << percepionNeuronReaderData.size() << endl;
         }
     }
+    
+    start_t = percepionNeuronReaderData.at(0).timeMillis;
+    end_t = percepionNeuronReaderData.at(percepionNeuronReaderData.size()-1).timeMillis;
+    pnTime = 0;
+    currentTime = 0;
     
     ready = true;
     
@@ -122,16 +128,58 @@ bool PerceptionNeuronReader::loadFile(std::string filename){
     return false;
 }
 
-void PerceptionNeuronReader::update(){
+void PerceptionNeuronReader::update(int time){
+    currentTime = time;
     if(ready && running){
-        uint64_t ellapsedTimeMillis = ofGetElapsedTimeMillis();
-        if(ofGetElapsedTimeMillis() - currentPerceptionNeuronReaderData->timeMillis > diffNextMillis){
-            goToNextData();
+        if (currentTime > start_t && currentTime < end_t){
+            uint64_t ellapsedTimeMillis = ofGetElapsedTimeMillis();
+            if(ofGetElapsedTimeMillis() - currentPerceptionNeuronReaderData->timeMillis > diffNextMillis){
+                goToNextData();
+            }
+        }
+        else if (currentPerceptionNeuronReaderData == NULL){
+            currentPerceptionNeuronReaderData = &percepionNeuronReaderData.at(0);
         }
     }
 }
 
 void PerceptionNeuronReader::goToNextData(){
+    
+    // Seek time if the distance is too high
+    int distance = glm::abs(currentTime-pnTime);
+    if (distance > 1000){
+        int bias = 100;
+        if (bias >= percepionNeuronReaderData.size()){
+            bias = 1;
+        }
+        
+        int testTime = pnTime;
+        int prevTestTime = 0;
+        int testIndex = bias;
+        if (pnTime > distance){
+            testTime = start_t;
+        }
+        
+        while (testTime <= currentTime && testIndex < percepionNeuronReaderData.size()) {
+            prevTestTime = testTime;
+            currentPerceptionNeuronReaderData = &percepionNeuronReaderData.at(testIndex);
+            testTime = currentPerceptionNeuronReaderData->timeMillis;
+            
+            if (testTime > currentTime){
+                currentIndex = testIndex-bias;
+                pnTime = prevTestTime;
+//                cout << "Seek time: " << ofToString(currentTime) << " | " << ofToString(pnTime) << endl;
+                break;
+            } else{
+                testIndex += bias;
+            }
+        }
+        
+        
+    }
+    
+    
+    
     currentIndex++;
     
     //loop

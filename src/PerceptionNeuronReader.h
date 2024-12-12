@@ -24,7 +24,7 @@ public:
     bool load(std::string folder);          //load all files from a folder
     void loadAsync(std::string folder);     //load in a separate thread all files from folder
     bool isReady();                         //all files are loaded and data is ready in memory
-    void update();                          //function to call every update
+    void update(int time);                          //function to call every update
     void start();                           //start running
     bool isRunning();
     int getFrameNum();
@@ -43,6 +43,12 @@ protected:
     bool running = false;
     
     int currentIndex = -1;
+
+    uint64_t start_t;
+    uint64_t end_t;
+    
+    uint64_t pnTime;
+    uint64_t currentTime;
     
     //time
     uint64_t diffNextMillis;          //time in millis to next value
