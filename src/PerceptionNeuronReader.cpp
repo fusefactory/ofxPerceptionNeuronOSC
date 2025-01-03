@@ -130,6 +130,16 @@ bool PerceptionNeuronReader::loadFile(std::string filename){
 
 void PerceptionNeuronReader::update(int time){
     currentTime = time;
+    
+    if (loop) {
+        if (currentTime < start_t){
+            currentTime += start_t;
+        }
+        else if (currentTime > end_t) {
+            currentTime = currentTime % (end_t - start_t) + start_t;
+        }
+    }
+    
     if(ready && running){
         if (currentTime > start_t && currentTime < end_t){
             goToNextData();
@@ -202,5 +212,10 @@ void PerceptionNeuronReader::goToNextData(){
 //        
 //        diffNextMillis = nextDataTime - currentPerceptionNeuronReaderData->timeMillis;
 //    }
+}
+
+
+void PerceptionNeuronReader::setLoop(bool _l){
+    loop = _l;
 }
 

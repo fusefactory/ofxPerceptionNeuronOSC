@@ -30,6 +30,8 @@ public:
     int getFrameNum();
     std::map<PerceptionNeuronJointType, PerceptionNeuronJoint> getCurrentAvatar();
     
+    void setLoop(bool _l);
+    
 protected:
     void threadedFunction();
     bool loadFile(std::string filename);
@@ -41,6 +43,7 @@ protected:
 
     bool ready = false;
     bool running = false;
+    bool loop = false;
     
     int currentIndex = -1;
 
