@@ -158,6 +158,8 @@ void PerceptionNeuronReader::goToNextData(){
     
     // Seek time if the distance is too high
     int distance = glm::abs(currentTime-pnTime);
+    if (distance < 0)
+        distance = -distance;
     if (distance > 1000){
         int bias = 100;
         if (bias >= percepionNeuronReaderData.size()){
